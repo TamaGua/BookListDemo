@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+    >
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_marginRight="5dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginTop="5dp"
+        android:layout_gravity="center">
+     <RelativeLayout
+         android:layout_height="150dp"
+         android:layout_width="match_parent"
+         android:layout_gravity="center"
+         android:layout_margin="5dp"
+         android:background="@mipmap/ic_launcher"
+         android:id="@+id/rl_cover">
+    <TextView
+        android:layout_height="16dp"
+        android:layout_width="wrap_content"
+        android:layout_marginLeft="2dp"
+        android:background="@drawable/shape"
+        android:id="@+id/tv_hot"
+        android:gravity="center"
+        android:layout_above="@id/tv_words"
+        android:textColor="#EEFFFFFF"
+        android:padding="2dp"
+        android:layout_marginBottom="2dp"
+        android:textSize="9dp"
+        android:text="60.1w"/>
+
+    <TextView
+        android:layout_height="16dp"
+        android:layout_width="wrap_content"
+        android:layout_marginLeft="2dp"
+        android:background="@drawable/shape_words"
+        android:id="@+id/tv_words"
+        android:gravity="center"
+        android:layout_above="@id/tv_author"
+        android:textColor="#EEFFFFFF"
+        android:padding="2dp"
+        android:layout_marginBottom="2dp"
+        android:textSize="9dp"
+        android:text="60.1w"/>
+
+    <TextView
+        android:layout_height="16dp"
+        android:layout_width="wrap_content"
+        android:layout_marginLeft="2dp"
+        android:background="@drawable/shape_author"
+        android:id="@+id/tv_author"
+        android:gravity="center"
+        android:textColor="#EEFFFFFF"
+        android:padding="2dp"
+        android:layout_marginBottom="2dp"
+        android:textSize="8dp"
+        android:text="七夕"
+        android:layout_alignParentBottom="true"/>
+
+</RelativeLayout>
+
+    <TextView
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_gravity="center"
+        android:id="@+id/tv_title"
+        android:textSize="14dp"
+        android:text="啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:maxEms="6"/>
+
+</LinearLayout>
+
+</LinearLayout>
