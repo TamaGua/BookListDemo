@@ -3,19 +3,26 @@ package com.example.lightdemo.Widget;
 import android.content.Context;
 import android.icu.util.Freezable;
 import android.os.Build;
+import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
 import com.example.lightdemo.Bean.Author;
+import com.example.lightdemo.Bean.Book;
 import com.example.lightdemo.Bean.BookBitmap;
 import com.example.lightdemo.R;
 import com.example.lightdemo.tools.HttpUtils;
@@ -24,6 +31,13 @@ import java.util.List;
 
 public class MyListView extends ScrollView {
 
+    //防止内存泄漏抽离出来的定义
+    private View view;
+    private View childAt;
+    private Author author;
+
+
+    private  ViewHolder viewHolder;
     private List<BookBitmap> bookBitmaps;
     private Context context;
     private int windowWidth = 0;
@@ -59,7 +73,7 @@ public class MyListView extends ScrollView {
         linearLayout.setId(R.id.ll);
 
         for (int i = 0; i < bookBitmaps.size(); i++) {
-            View view = View.inflate(context, R.layout.cell_book, null);
+            view = View.inflate(context, R.layout.cell_book, null);
             linearLayout.addView(view);
             refreshListData(view, i);
         }
@@ -75,11 +89,19 @@ public class MyListView extends ScrollView {
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     public void refreshListData(View view, int pos) {
-        rlCover = (RelativeLayout) view.findViewById(R.id.rl_cover);
-        tvTitle = (TextView) view.findViewById(R.id.tv_title);
-        tvHot = (TextView) view.findViewById(R.id.tv_hot);
-        tvWords = (TextView) view.findViewById(R.id.tv_words);
-        tvAuthor = (TextView) view.findViewById(R.id.tv_author);
+        //试图用ViewHolder替代
+//        rlCover = (RelativeLayout) view.findViewById(R.id.rl_cover);
+//        tvTitle = (TextView) view.findViewById(R.id.tv_title);
+//        tvHot = (TextView) view.findViewById(R.id.tv_hot);
+//        tvWords = (TextView) view.findViewById(R.id.tv_words);
+//        tvAuthor = (TextView) view.findViewById(R.id.tv_author);
+        viewHolder = new ViewHolder(view);
+        rlCover = viewHolder.rlCover;
+        tvTitle = viewHolder.tvTitle;
+        tvHot = viewHolder.tvHot;
+        tvWords = viewHolder.tvWords;
+        tvAuthor = viewHolder.tvAuthor;
+
         BookBitmap bookBitmap = bookBitmaps.get(pos);
         rlCover.setBackground(bookBitmap.getCoverDraw());
         tvTitle.setText(bookBitmap.getName());
@@ -87,7 +109,7 @@ public class MyListView extends ScrollView {
         tvHot.setText(hot + "万");
         float words = (float) ((int) bookBitmap.getWords() / 10000 + ((int) bookBitmap.getWords() / 1000) * 0.1);
         tvWords.setText(words + "万");
-        Author author = bookBitmap.getAuthor();
+         author = bookBitmap.getAuthor();
         if (author != null) {
             tvAuthor.setText(bookBitmap.getAuthor().getNick());
         }
@@ -105,13 +127,21 @@ public class MyListView extends ScrollView {
      */
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     public void addData(List<BookBitmap> books) {
-        int num = bookBitmaps.size();
+//        int num = bookBitmaps.size();
+//
+//        linearLayout = (LinearLayout)findViewById(R.id.ll);
 
-        linearLayout = (LinearLayout)findViewById(R.id.ll);
+        //移除末尾三个提示view
+        for(int i = 0;i<3;i++){
+             childAt = linearLayout.getChildAt(bookNum);
+            linearLayout.removeView(childAt);
+        }
+
+
         if (bookBitmaps == null||linearLayout==null) return;
 //        else this.bookBitmaps.addAll(bookBitmaps);
         for (int i = bookNum; i < bookBitmaps.size(); i++) {
-            View view = View.inflate(context, R.layout.cell_book, null);
+             view = View.inflate(context, R.layout.cell_book, null);
             linearLayout.addView(view);
             refreshListData(view, i);
         }
@@ -130,6 +160,9 @@ public class MyListView extends ScrollView {
         this.removeAllViews();
     }
 
+    //导出子控件高度以便后续使用
+    int childMeasuredHeight;
+    int childMeasuredWidth;
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
@@ -138,28 +171,35 @@ public class MyListView extends ScrollView {
         int left = 0;
         int top = 0;
 
-        LinearLayout ll = (LinearLayout) findViewById(R.id.ll);
-        View childAt = ll.getChildAt(0);
+        //设置图片高度自适应
 
-        int childMeasuredWidth = childAt.getMeasuredWidth();
-        int childMeasuredHeight = childAt.getMeasuredHeight();
+//        LinearLayout ll = (LinearLayout) findViewById(R.id.ll);
+         childAt = linearLayout.getChildAt(0);
+        if(childAt==null)return;
+         childMeasuredWidth = childAt.getMeasuredWidth();
+         childMeasuredHeight = childAt.getMeasuredHeight();
 
         View linearChild = getChildAt(0);
         linearChild.layout(0,0,windowWidth,childMeasuredHeight*(bookBitmaps.size())/3);
         //给所有的子控件设置布局
-        int childCount = ll.getChildCount();
+        int childCount = linearLayout.getChildCount();
 
         //设置子控件宽度以适应一行三个
         for (int i = 0; i < childCount; i++) {
-            childAt = ll.getChildAt(i);
+            childAt = linearLayout.getChildAt(i);
+//            if(!childAt.getClass().equals(TextView.class)){
+//            if(i!=bookNum){
             LinearLayout.LayoutParams linearParams = (LinearLayout.LayoutParams) childAt.getLayoutParams(); //取控件当前的布局参数
-            linearParams.width = windowWidth / 3;// 控件的宽强制设成1/3
+            linearParams.width = windowWidth / 3;// 控件的宽强制设为窗口的1/3
+            linearParams.height = (int) (windowHeight / 3.5);
             childAt.setLayoutParams(linearParams);
+
+
         }
 
         for (int i = 0; i < childCount; i++) {
 
-            View child = ll.getChildAt(i);
+            View child = linearLayout.getChildAt(i);
             if (child.getVisibility() == View.GONE) {
                 continue;
             }
@@ -171,6 +211,7 @@ public class MyListView extends ScrollView {
                 left = 0;
                 top = top + childMeasuredHeight;
             }
+
         }
     }
 
@@ -180,11 +221,11 @@ public class MyListView extends ScrollView {
             setMeasuredDimension(0, 0);
             return;
         }
-        LinearLayout ll = (LinearLayout) findViewById(R.id.ll);
+//        LinearLayout ll = (LinearLayout) findViewById(R.id.ll);
 
         //获取子view的个数
         int childCount;
-        childCount = ll.getChildCount();
+        childCount = linearLayout.getChildCount();
         if (childCount == 0) {
             //如果没有子元素，则设置宽高大小为0
             setMeasuredDimension(0, 0);
@@ -195,25 +236,59 @@ public class MyListView extends ScrollView {
 
         setMeasuredDimension(windowWidth, windowHeight);
     }
-
+    int page = 0;
     public boolean firstIn = true;
     /**
      * 滚动触底时更新显示内容
      */
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     @Override
     protected void onOverScrolled(int scrollX, int scrollY, boolean clampedX, boolean clampedY) {
         super.onOverScrolled(scrollX, scrollY, clampedX, clampedY);
 
-       if(clampedY &&firstIn) {
+            if(scrollY >childMeasuredHeight*bookNum/3-3000&&firstIn){
+//       if(clampedY &&firstIn) {
            firstIn = false;
+
+
+           //在加载时显示正在加载字样
            Log.i("测试", "到底了");
-           final int page = bookBitmaps.size() / 3 + 1;
+           TextView tv1 = new TextView(context);
+           tv1.setText("");
+           TextView tv2 = new TextView(context);
+           tv2.setText("正在加载");
+           tv2.setGravity(Gravity.CENTER_HORIZONTAL);
+           tv2.setPadding(0,100,0,0);
+           TextView tv3 = new TextView(context);
+           tv3.setText("");
+
+           linearLayout.addView(tv1);
+           linearLayout.addView(tv2);
+           linearLayout.addView(tv3);
+           this.requestLayout();
+           this.invalidate();
+           final MyListView view = this;
+
+           //为什么正在加载没有显示出来
+
+        /*   new Handler().postDelayed(new Runnable() {
+               @Override
+                 public void run() {
+//               view.scrollTo(0,0);
+                 view.requestLayout();
+                 view.invalidate();
+                 view.fullScroll(FOCUS_DOWN);
+                    }
+                }, 0);*/
+
+           page = bookBitmaps.size() / 3 + 1;
            new Thread(new Runnable() {
                @Override
                public void run() {
                    HttpUtils.sendPostMessage("utf-8", page, context);
                }
            }).start();
+
        }
     }
 
@@ -222,6 +297,66 @@ public class MyListView extends ScrollView {
         this.windowWidth = windowWidth;
         this.windowHeight = windowHeight;
     }
+
+//    //试图用Adapter重构
+//    public class BooksAdapter extends ArrayAdapter<BookBitmap> {
+//        private int mResourceId;
+//
+//        public BooksAdapter(@NonNull Context context, int resource, @NonNull List<BookBitmap> objects) {
+//            super(context, resource, objects);
+//            mResourceId = resource;
+//        }
+//
+//        @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
+//        @NonNull
+//        @Override
+//        public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+//            View view;
+//            ViewHolder viewHolder;
+//            if (convertView == null) {
+//                view = LayoutInflater.from(getContext()).inflate(mResourceId, parent, false);
+//                viewHolder = new ViewHolder();
+//
+//                viewHolder.rlCover = (RelativeLayout) view.findViewById(R.id.rl_cover);
+//                viewHolder.tvTitle = (TextView) view.findViewById(R.id.tv_title);
+//                viewHolder.tvHot = (TextView) view.findViewById(R.id.tv_hot);
+//                viewHolder.tvWords = (TextView) view.findViewById(R.id.tv_words);
+//                viewHolder.tvAuthor = (TextView) view.findViewById(R.id.tv_author);
+//                view.setTag(viewHolder);
+//            } else {
+//                view = convertView;
+//                viewHolder = (ViewHolder)view.getTag();
+//            }
+//
+//            BookBitmap bookBitmap = getItem(position);
+//            rlCover.setBackground(bookBitmap.getCoverDraw());
+//            tvTitle.setText(bookBitmap.getName());
+//            float hot = (float) ((int) bookBitmap.getHot() / 10000 + ((int) bookBitmap.getHot() / 1000) * 0.1);
+//            tvHot.setText(hot + "万");
+//            float words = (float) ((int) bookBitmap.getWords() / 10000 + ((int) bookBitmap.getWords() / 1000) * 0.1);
+//            tvWords.setText(words + "万");
+//            Author author = bookBitmap.getAuthor();
+//            if (author != null) {
+//                tvAuthor.setText(bookBitmap.getAuthor().getNick());
+//            }
+//            return view;
+//        }
+
+        class ViewHolder {
+            public RelativeLayout rlCover;//封面
+            public TextView tvTitle;//标题
+            public TextView tvAuthor;//作者
+            public TextView tvWords;//字数
+            public TextView tvHot;//热度
+            public ViewHolder(@NonNull View itemView) {
+                rlCover = (RelativeLayout)itemView.findViewById(R.id.rl_cover);
+                tvTitle = (TextView)itemView.findViewById(R.id.tv_title);
+                tvHot = (TextView)itemView.findViewById(R.id.tv_hot);
+                tvWords = (TextView)itemView.findViewById(R.id.tv_words);
+                tvAuthor = (TextView)itemView.findViewById(R.id.tv_author);
+
+            }
+        }
 
 }
 
