@@ -53,7 +53,6 @@ public class HttpUtils {
     public static final int UPDATE_UI = 0x121;
 
 
-    public static MyImageLoader mImageLoader;
 
     public HttpUtils() {
         super();
@@ -72,9 +71,7 @@ public class HttpUtils {
      * @return 返回数据
      */
     public static List<BookBitmap>  sendPostMessage (String encode, int page,Context con){
-//        StringBuffer buffer = new StringBuffer();
-        //创建自定义的图片加载类
-        mImageLoader = new MyImageLoader();
+
         if(con==null){
             Log.i("MSG","无上下文嘞");
             return null;
@@ -131,8 +128,6 @@ public class HttpUtils {
         }
 
             bookBitmap.setCoverDraw(drawbale);
-            //改为将图片存储到缓存
-//            mImageLoader.addBitmap(bookBitmap.getCover(), bitmap);
         }
     }
         Message msgToClient = Message.obtain(null, DATA_OK);
@@ -232,8 +227,6 @@ public static class MessengerService extends Service
                     msgToClient.what = FIRST_CONNECT;
                     try
                     {
-                        //模拟耗时
-//                        Thread.sleep(2000);
                         msgfromClient.replyTo.send(msgToClient);
                     }catch (RemoteException e)
                     {

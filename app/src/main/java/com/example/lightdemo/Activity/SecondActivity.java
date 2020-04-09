@@ -22,18 +22,14 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.example.lightdemo.Bean.BookBitmap;
 import com.example.lightdemo.R;
 import com.example.lightdemo.Widget.MyListView;
 import com.example.lightdemo.tools.HttpUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class SecondActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener{
 
     private MyListView myListView;
-    private List<BookBitmap> bookBitmaps;
+//    private List<BookBitmap> bookBitmaps;
     private SwipeRefreshLayout srLayout;
     private int page = 1;
 
@@ -72,7 +68,6 @@ public class SecondActivity extends AppCompatActivity implements SwipeRefreshLay
 
     private void initData() {
         loadStatus=INIT;
-        bookBitmaps = new ArrayList<>();
         new Thread(new Runnable(){
             @Override
             public void run() {
@@ -118,27 +113,21 @@ public class SecondActivity extends AppCompatActivity implements SwipeRefreshLay
                 case IDLE:break;
                 case UP_PULL:{//上拉刷新完毕
                     loadStatus = IDLE;
-                    bookBitmaps.clear();
-                    bookBitmaps.addAll(HttpUtils.getBookBitmaps());
                     srLayout.setRefreshing(false);
                     myListView.clearData();
-                    myListView.refreshData(bookBitmaps);
+                    myListView.refreshData(HttpUtils.getBookBitmaps());
                     myListView.requestLayout();
                     myListView.invalidate();
                     i++;
                 }break;
                 case DOWN_SCROLL: {//下滑刷新完毕
                     loadStatus = IDLE;
-                    bookBitmaps.addAll(HttpUtils.getBookBitmaps());
                     myListView.addData(HttpUtils.getBookBitmaps());
                     i++;
                 }break;
                 case INIT:{//初始化完毕
                     loadStatus = IDLE;
-                    bookBitmaps.clear();
-                    bookBitmaps.addAll(HttpUtils.getBookBitmaps());
-//                  adapter.notifyDataSetChanged();
-                    myListView.init(bookBitmaps);
+                    myListView.init(HttpUtils.getBookBitmaps());
                     myListView.requestLayout();
                     myListView.invalidate();
                     i++;

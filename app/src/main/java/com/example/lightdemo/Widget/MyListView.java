@@ -18,7 +18,6 @@ import com.example.lightdemo.Bean.Author;
 import com.example.lightdemo.Bean.BookBitmap;
 import com.example.lightdemo.R;
 import com.example.lightdemo.tools.HttpUtils;
-import com.example.lightdemo.tools.MyImageLoader;
 
 import java.util.List;
 
@@ -127,7 +126,7 @@ public class MyListView extends ScrollView {
         page++;
         //已显示item总数
         itemNum = (page-1)*18;
-
+        bookBitmaps.addAll(books);
         //移除末尾三个提示view
         for(int i = 0;i<3;i++){
             childAt = linearLayout.getChildAt((page-2)*18);
@@ -135,11 +134,15 @@ public class MyListView extends ScrollView {
         }
 
         //清理不可见书籍数据
-        if(bookBitmaps.size()>36){
+        if(bookBitmaps.size()>=36){
         for(int i = 0; i<18;i++){
            bookBitmaps.remove(i);
         }}
-
+//        if(linearLayout.getChildCount()>=36){
+//            for(int i = 0; i<18;i++){
+//                View view = linearLayout.getChildAt(i);
+//                linearLayout.removeView(view);
+//            }}
 
         if (bookBitmaps == null||linearLayout==null) return;
         for (int i = 18; i < bookBitmaps.size(); i++) {
