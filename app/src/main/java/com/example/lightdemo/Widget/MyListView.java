@@ -1,37 +1,29 @@
 package com.example.lightdemo.Widget;
 
 import android.content.Context;
-import android.icu.util.Freezable;
 import android.os.Build;
-import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
 import com.example.lightdemo.Bean.Author;
-import com.example.lightdemo.Bean.Book;
 import com.example.lightdemo.Bean.BookBitmap;
 import com.example.lightdemo.R;
 import com.example.lightdemo.tools.HttpUtils;
+import com.example.lightdemo.tools.MyImageLoader;
 
 import java.util.List;
 
 public class MyListView extends ScrollView {
 
-    //防止内存泄漏抽离出来的定义
     private View view;
     private View childAt;
     private Author author;
@@ -42,6 +34,7 @@ public class MyListView extends ScrollView {
     private Context context;
     private int windowWidth = 0;
     private int windowHeight = 0;
+
 
     private int bookNum = 0;
     public MyListView(Context context) {
@@ -87,6 +80,8 @@ public class MyListView extends ScrollView {
     public TextView tvWords;//字数
     public TextView tvHot;//热度
 
+    private int itemNum = 18;//当前显示个数
+
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     public void refreshListData(View view, int pos) {
         //试图用ViewHolder替代
@@ -103,7 +98,9 @@ public class MyListView extends ScrollView {
         tvAuthor = viewHolder.tvAuthor;
 
         BookBitmap bookBitmap = bookBitmaps.get(pos);
+
         rlCover.setBackground(bookBitmap.getCoverDraw());
+
         tvTitle.setText(bookBitmap.getName());
         float hot = (float) ((int) bookBitmap.getHot() / 10000 + ((int) bookBitmap.getHot() / 1000) * 0.1);
         tvHot.setText(hot + "万");
@@ -127,27 +124,33 @@ public class MyListView extends ScrollView {
      */
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     public void addData(List<BookBitmap> books) {
-//        int num = bookBitmaps.size();
-//
-//        linearLayout = (LinearLayout)findViewById(R.id.ll);
+        page++;
+        //已显示item总数
+        itemNum = (page-1)*18;
 
         //移除末尾三个提示view
         for(int i = 0;i<3;i++){
-             childAt = linearLayout.getChildAt(bookNum);
+            childAt = linearLayout.getChildAt((page-2)*18);
             linearLayout.removeView(childAt);
         }
 
+        //清理不可见书籍数据
+        if(bookBitmaps.size()>36){
+        for(int i = 0; i<18;i++){
+           bookBitmaps.remove(i);
+        }}
+
 
         if (bookBitmaps == null||linearLayout==null) return;
-//        else this.bookBitmaps.addAll(bookBitmaps);
-        for (int i = bookNum; i < bookBitmaps.size(); i++) {
+        for (int i = 18; i < bookBitmaps.size(); i++) {
              view = View.inflate(context, R.layout.cell_book, null);
             linearLayout.addView(view);
             refreshListData(view, i);
         }
-        bookNum = bookBitmaps.size();
+
         this.requestLayout();
         this.invalidate();
+        this.firstIn = true;
     }
 
     /**
@@ -172,23 +175,19 @@ public class MyListView extends ScrollView {
         int top = 0;
 
         //设置图片高度自适应
-
-//        LinearLayout ll = (LinearLayout) findViewById(R.id.ll);
          childAt = linearLayout.getChildAt(0);
         if(childAt==null)return;
          childMeasuredWidth = childAt.getMeasuredWidth();
          childMeasuredHeight = childAt.getMeasuredHeight();
 
         View linearChild = getChildAt(0);
-        linearChild.layout(0,0,windowWidth,childMeasuredHeight*(bookBitmaps.size())/3);
+        linearChild.layout(0,0,windowWidth,childMeasuredHeight*(itemNum/3+1));
         //给所有的子控件设置布局
         int childCount = linearLayout.getChildCount();
 
         //设置子控件宽度以适应一行三个
         for (int i = 0; i < childCount; i++) {
             childAt = linearLayout.getChildAt(i);
-//            if(!childAt.getClass().equals(TextView.class)){
-//            if(i!=bookNum){
             LinearLayout.LayoutParams linearParams = (LinearLayout.LayoutParams) childAt.getLayoutParams(); //取控件当前的布局参数
             linearParams.width = windowWidth / 3;// 控件的宽强制设为窗口的1/3
             linearParams.height = (int) (windowHeight / 3.5);
@@ -236,7 +235,7 @@ public class MyListView extends ScrollView {
 
         setMeasuredDimension(windowWidth, windowHeight);
     }
-    int page = 0;
+    int page = 2;
     public boolean firstIn = true;
     /**
      * 滚动触底时更新显示内容
@@ -246,7 +245,7 @@ public class MyListView extends ScrollView {
     protected void onOverScrolled(int scrollX, int scrollY, boolean clampedX, boolean clampedY) {
         super.onOverScrolled(scrollX, scrollY, clampedX, clampedY);
 
-            if(scrollY >childMeasuredHeight*bookNum/3-3000&&firstIn){
+            if(scrollY >childMeasuredHeight*itemNum/3-2500&&firstIn){
 //       if(clampedY &&firstIn) {
            firstIn = false;
 
@@ -281,11 +280,12 @@ public class MyListView extends ScrollView {
                     }
                 }, 0);*/
 
-           page = bookBitmaps.size() / 3 + 1;
+//           page = bookBitmaps.size() / 18+1;
            new Thread(new Runnable() {
                @Override
                public void run() {
                    HttpUtils.sendPostMessage("utf-8", page, context);
+
                }
            }).start();
 

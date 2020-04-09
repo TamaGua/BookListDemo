@@ -131,9 +131,6 @@ public class SecondActivity extends AppCompatActivity implements SwipeRefreshLay
                     loadStatus = IDLE;
                     bookBitmaps.addAll(HttpUtils.getBookBitmaps());
                     myListView.addData(HttpUtils.getBookBitmaps());
-                    myListView.firstIn = true;
-//                  adapter.notifyDataSetChanged();
-//                  adapter.hideFootViewHolder();
                     i++;
                 }break;
                 case INIT:{//初始化完毕

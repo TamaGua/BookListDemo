@@ -47,11 +47,13 @@ public class HttpUtils {
     private static List<BookBitmap> bookBitmaps;
     public static Messenger serviceMessager;
     public static Context context;
-    public static int page;
 
     public static final int FIRST_CONNECT = 0x111;
     public static final int DATA_OK = 0x121;
     public static final int UPDATE_UI = 0x121;
+
+
+    public static MyImageLoader mImageLoader;
 
     public HttpUtils() {
         super();
@@ -71,6 +73,8 @@ public class HttpUtils {
      */
     public static List<BookBitmap>  sendPostMessage (String encode, int page,Context con){
 //        StringBuffer buffer = new StringBuffer();
+        //创建自定义的图片加载类
+        mImageLoader = new MyImageLoader();
         if(con==null){
             Log.i("MSG","无上下文嘞");
             return null;
@@ -120,13 +124,17 @@ public class HttpUtils {
             uri = "https://japari.linovel.net/v1/image/jump?XDEVICE=\n" +
                     "1&path="+bookBitmap.getCover();
             BitmapDrawable drawbale = null;
+            //确保图片已正确转换为Bitmap
             while (bitmap==null||drawbale==null){
             bitmap = ImageLoader.getInstance().loadImageSync(uri);
-            drawbale = new BitmapDrawable(context.getResources(),
-                    bitmap);
+            drawbale = new BitmapDrawable(context.getResources(),bitmap);
         }
+
             bookBitmap.setCoverDraw(drawbale);
-        }}
+            //改为将图片存储到缓存
+//            mImageLoader.addBitmap(bookBitmap.getCover(), bitmap);
+        }
+    }
         Message msgToClient = Message.obtain(null, DATA_OK);
         //往客户端发送消息
         try {if(serviceMessager!=null){
