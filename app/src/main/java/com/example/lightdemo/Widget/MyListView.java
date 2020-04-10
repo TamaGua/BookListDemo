@@ -158,7 +158,6 @@ public class MyListView extends ScrollView {
 
         this.requestLayout();
         this.invalidate();
-        if(page<4)
         this.firstIn = true;
     }
 
