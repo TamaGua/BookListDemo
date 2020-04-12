@@ -1,8 +1,7 @@
-package com.example.lightdemo.tools;
+package com.example.lightdemo.Tools;
 
 
 import android.graphics.Bitmap;
-import android.util.LruCache;
 
 import java.util.HashMap;
 import java.util.Map;

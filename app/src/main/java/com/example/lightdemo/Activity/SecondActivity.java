@@ -24,7 +24,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.lightdemo.R;
 import com.example.lightdemo.Widget.MyListView;
-import com.example.lightdemo.tools.HttpUtils;
+import com.example.lightdemo.Tools.HttpUtils;
 
 public class SecondActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener{
 

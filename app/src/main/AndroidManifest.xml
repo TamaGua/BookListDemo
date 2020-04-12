@@ -21,7 +21,7 @@
         </activity>
 
         <service
-            android:name="com.example.lightdemo.tools.HttpUtils$MessengerService">
+            android:name="com.example.lightdemo.Tools.HttpUtils$MessengerService">
             <intent-filter>
                 <action android:name="com.zhy.aidl.calc"></action>
                 <category android:name="android.intent.category.DEFAULT" />

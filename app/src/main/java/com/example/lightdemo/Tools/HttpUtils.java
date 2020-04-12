@@ -1,4 +1,4 @@
-package com.example.lightdemo.tools;
+package com.example.lightdemo.Tools;
 
 import android.annotation.SuppressLint;
 import android.content.Context;

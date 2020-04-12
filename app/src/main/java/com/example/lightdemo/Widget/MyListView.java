@@ -2,8 +2,6 @@ package com.example.lightdemo.Widget;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -20,8 +18,7 @@ import androidx.annotation.RequiresApi;
 import com.example.lightdemo.Bean.Author;
 import com.example.lightdemo.Bean.BookBitmap;
 import com.example.lightdemo.R;
-import com.example.lightdemo.tools.HttpUtils;
-import com.example.lightdemo.tools.MyImageLoader;
+import com.example.lightdemo.Tools.HttpUtils;
 
 import java.util.List;
 
@@ -36,8 +33,6 @@ public class MyListView extends ScrollView {
     private Context context;
     private int windowWidth = 0;
     private int windowHeight = 0;
-
-
 
     private int bookNum = 0;
     public MyListView(Context context) {
@@ -130,16 +125,17 @@ public class MyListView extends ScrollView {
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     public void addData(List<BookBitmap> books) {
         page++;
-        //已显示item总数
-        itemNum = (page-1)*18;
+
         bookBitmaps.addAll(books);
         //移除末尾三个提示view
         for(int i = 0;i<3;i++){
-            if(page<4) childAt = linearLayout.getChildAt((page-2)*18);
-            else  childAt = linearLayout.getChildAt(2*18);
+//            if(page<4) childAt = linearLayout.getChildAt((page-2)*18);
+//            else  childAt = linearLayout.getChildAt(2*18);
+            childAt = linearLayout.getChildAt(itemNum);
             linearLayout.removeView(childAt);
         }
-
+        //已显示item总数
+        itemNum = (page-1)*18;
 
 
 
@@ -252,16 +248,16 @@ public class MyListView extends ScrollView {
     @Override
     protected void onOverScrolled(int scrollX, int scrollY, boolean clampedX, boolean clampedY) {
         super.onOverScrolled(scrollX, scrollY, clampedX, clampedY);
-            if(scrollY>childMeasuredHeight*12){
-                for(int i = 0;i<18;i++){
-                    View view = linearLayout.getChildAt(0);
-
-                    linearLayout.removeView(view);
-                }
-                itemNum = linearLayout.getChildCount();
-                this.requestLayout();
-                this.invalidate();
-            }
+//            if(scrollY>childMeasuredHeight*12){
+//                for(int i = 0;i<18;i++){
+//                    View view = linearLayout.getChildAt(0);
+//
+//                    linearLayout.removeView(view);
+//                }
+//                itemNum = linearLayout.getChildCount();
+//                this.requestLayout();
+//                this.invalidate();
+//            }
             if(scrollY >childMeasuredHeight*itemNum/3-2500&&firstIn){
 //       if(clampedY &&firstIn) {
            firstIn = false;
